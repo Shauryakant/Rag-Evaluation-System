@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pandas as pd
+import plotly.express as px
 import streamlit as st
 
 from src.config import RESULTS_CSV
@@ -80,6 +81,26 @@ def main() -> None:
         filtered_df.sort_values(by=["recall_at_k", "mrr"], ascending=False),
         use_container_width=True,
     )
+
+    # Heatmap Section: Chunk Size vs Top K
+    st.subheader("🔥 Recall@k Heatmap: Chunk Size vs Top K")
+    pivot_df = df.pivot_table(
+        index="chunk_size",
+        columns="top_k",
+        values="recall_at_k",
+        aggfunc="mean",
+    )
+    fig_heatmap = px.imshow(
+        pivot_df,
+        labels=dict(x="Top K", y="Chunk Size", color="Recall@k"),
+        x=[str(c) for c in pivot_df.columns],
+        y=[str(r) for r in pivot_df.index],
+        color_continuous_scale="Blues",
+        text_auto=".4f",
+        title="Mean Recall@k across Chunk Sizes and Top K Values",
+    )
+    fig_heatmap.update_layout(xaxis_title="Top K", yaxis_title="Chunk Size")
+    st.plotly_chart(fig_heatmap, use_container_width=True)
 
 
 if __name__ == "__main__":
