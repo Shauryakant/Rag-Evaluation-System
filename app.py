@@ -102,6 +102,29 @@ def main() -> None:
     fig_heatmap.update_layout(xaxis_title="Top K", yaxis_title="Chunk Size")
     st.plotly_chart(fig_heatmap, use_container_width=True)
 
+    # Retriever Comparison Bar Chart Section
+    st.subheader("📈 Retriever Performance Comparison (Vector vs BM25 vs Hybrid)")
+    bar_col1, bar_col2 = st.columns(2)
+    with bar_col1:
+        bar_chunk_size = st.selectbox("Select Chunk Size for Comparison", sorted(df["chunk_size"].unique()), key="bar_cs")
+    with bar_col2:
+        bar_top_k = st.selectbox("Select Top K for Comparison", sorted(df["top_k"].unique()), key="bar_tk")
+
+    chart_df = df[(df["chunk_size"] == bar_chunk_size) & (df["top_k"] == bar_top_k)]
+    fig_bar = px.bar(
+        chart_df,
+        x="retriever",
+        y=["recall_at_k", "mrr"],
+        barmode="group",
+        color_discrete_sequence=["#1f77b4", "#ff7f0e"],
+        labels={"value": "Score", "variable": "Metric", "retriever": "Retriever Type"},
+        title=f"Retriever Performance (Chunk Size={bar_chunk_size}, Top K={bar_top_k})",
+        text_auto=".4f",
+    )
+    fig_bar.update_layout(yaxis_range=[0, 1.1])
+    st.plotly_chart(fig_bar, use_container_width=True)
+
 
 if __name__ == "__main__":
     main()
+
