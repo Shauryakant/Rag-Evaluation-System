@@ -1,0 +1,86 @@
+"""Streamlit dashboard for rag-eval-playground."""
+
+from pathlib import Path
+
+import pandas as pd
+import streamlit as st
+
+from src.config import RESULTS_CSV
+
+st.set_page_config(
+    page_title="RAG Evaluation Playground",
+    page_icon="⚡",
+    layout="wide",
+)
+
+
+@st.cache_data
+def load_results_data() -> pd.DataFrame:
+    """Load precomputed evaluation grid results from CSV."""
+    if not RESULTS_CSV.exists():
+        st.error(f"Results file not found at {RESULTS_CSV}. Please run python -m src.run_grid first.")
+        return pd.DataFrame()
+    return pd.read_csv(RESULTS_CSV)
+
+
+def main() -> None:
+    st.title("⚡ RAG Evaluation Playground")
+    st.markdown(
+        "Framework-free systematic benchmark comparing RAG chunk sizes, retrievers (Vector, BM25, Hybrid RRF), "
+        "and embedding models using ground-truth character span matching and LLM-as-judge faithfulness."
+    )
+
+    df = load_results_data()
+    if df.empty:
+        return
+
+    # Sidebar Filter Controls
+    st.sidebar.header("🔍 Filter Configurations")
+
+    chunk_sizes = ["All"] + [str(x) for x in sorted(df["chunk_size"].unique())]
+    selected_chunk_size = st.sidebar.selectbox("Chunk Size", chunk_sizes)
+
+    retrievers = ["All"] + sorted(df["retriever"].unique().tolist())
+    selected_retriever = st.sidebar.selectbox("Retriever", retrievers)
+
+    embedders = ["All"] + sorted(df["embedder"].unique().tolist())
+    selected_embedder = st.sidebar.selectbox("Embedder", embedders)
+
+    top_ks = ["All"] + [str(x) for x in sorted(df["top_k"].unique())]
+    selected_top_k = st.sidebar.selectbox("Top K", top_ks)
+
+    # Filter dataframe
+    filtered_df = df.copy()
+    if selected_chunk_size != "All":
+        filtered_df = filtered_df[filtered_df["chunk_size"] == int(selected_chunk_size)]
+    if selected_retriever != "All":
+        filtered_df = filtered_df[filtered_df["retriever"] == selected_retriever]
+    if selected_embedder != "All":
+        filtered_df = filtered_df[filtered_df["embedder"] == selected_embedder]
+    if selected_top_k != "All":
+        filtered_df = filtered_df[filtered_df["top_k"] == int(selected_top_k)]
+
+    # KPI Summary Cards
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Total Configurations", len(filtered_df))
+    with col2:
+        max_recall = filtered_df["recall_at_k"].max() if not filtered_df.empty else 0.0
+        st.metric("Best Recall@k", f"{max_recall:.4f}")
+    with col3:
+        max_mrr = filtered_df["mrr"].max() if not filtered_df.empty else 0.0
+        st.metric("Best MRR", f"{max_mrr:.4f}")
+    with col4:
+        valid_faith = filtered_df["faithfulness"].dropna()
+        max_faith = valid_faith.max() if not valid_faith.empty else 0.0
+        st.metric("Best Faithfulness", f"{max_faith:.4f}" if max_faith > 0 else "N/A")
+
+    st.subheader("📊 Evaluation Grid Results")
+    st.dataframe(
+        filtered_df.sort_values(by=["recall_at_k", "mrr"], ascending=False),
+        use_container_width=True,
+    )
+
+
+if __name__ == "__main__":
+    main()
