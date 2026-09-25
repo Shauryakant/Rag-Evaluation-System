@@ -125,3 +125,19 @@ python -m pytest tests/
 2. **Framework-Free Core GenAI**: All chunking, indexing, search, RRF merging, and evaluation metrics are written directly in native Python without relying on heavy frameworks (LangChain, LlamaIndex, or agents).
 3. **Index & Embedding Memory Optimization**: FAISS and BM25 indexes are constructed once per `(chunk_size, embedder)` pair and reused across `top_k` iterations, speeding up evaluation grid execution.
 
+---
+
+## 🌐 Deployment (Streamlit Community Cloud)
+
+This application is optimized for deployment on Streamlit Community Cloud:
+
+1. **Push Repository**: Ensure all changes and precomputed `results/results.csv` are committed to your GitHub repository.
+2. **Connect Streamlit Cloud**:
+   - Navigate to [share.streamlit.io](https://share.streamlit.io).
+   - Select repository `Shauryakant/Rag-Evaluation-System` and branch `main`.
+   - Set Main file path to `app.py`.
+3. **Secrets Management**:
+   - In Advanced Settings, add `GEMINI_API_KEY = "your_key"` if live generation features are enabled.
+   - The deployed dashboard reads precomputed data from `results/results.csv`, starting in under 60 seconds without requiring active API keys.
+
+
