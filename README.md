@@ -108,3 +108,20 @@ python -m pytest tests/
 
 ### Failure Case Analysis
 - **Context Boundary Splitting**: When `chunk_size=200`, complex questions requiring multi-sentence explanations occasionally get partitioned across chunk boundaries. Although sliding window overlap (10%) mitigates boundary loss, `top_k=3` vector retrieval sometimes ranks partial context fragments lower than complete paragraphs retrieved under `chunk_size=500`.
+
+---
+
+## ⚠️ Limitations & Technical Trade-offs
+
+1. **Synthetic Test Set Bias**: LLM-generated questions tend to focus on single-passage factual details, slightly favoring exact lexical matching (BM25) over complex multi-hop reasoning.
+2. **LLM Judge Stochasticity**: Claim-level LLM faithfulness scoring is subject to API noise and non-deterministic claim decomposition.
+3. **Corpus Scale Limitations**: Benchmark results on small document corpora provide valuable algorithmic insights but do not evaluate Approximate Nearest Neighbor (ANN) index quantization loss seen at scale.
+
+---
+
+## 📐 Key Design Decisions
+
+1. **Span-Based Ground Truth Matching**: Ground truth context is defined as character offsets `[gt_start_char, gt_end_char]` within raw source documents, allowing direct comparison across configurations with varying chunk boundaries.
+2. **Framework-Free Core GenAI**: All chunking, indexing, search, RRF merging, and evaluation metrics are written directly in native Python without relying on heavy frameworks (LangChain, LlamaIndex, or agents).
+3. **Index & Embedding Memory Optimization**: FAISS and BM25 indexes are constructed once per `(chunk_size, embedder)` pair and reused across `top_k` iterations, speeding up evaluation grid execution.
+
