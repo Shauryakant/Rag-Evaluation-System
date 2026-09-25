@@ -1,12 +1,17 @@
 """Streamlit dashboard for rag-eval-playground."""
 
+import json
 from pathlib import Path
 
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from src.config import RESULTS_CSV
+from src.chunking import chunk_text
+from src.config import DOCS_DIR, RESULTS_CSV, TESTSET_PATH
+from src.loader import load_documents
+from src.metrics import is_hit
+from src.retrievers import BM25Retriever, HybridRetriever, VectorRetriever
 
 st.set_page_config(
     page_title="RAG Evaluation Playground",
@@ -22,6 +27,15 @@ def load_results_data() -> pd.DataFrame:
         st.error(f"Results file not found at {RESULTS_CSV}. Please run python -m src.run_grid first.")
         return pd.DataFrame()
     return pd.read_csv(RESULTS_CSV)
+
+
+@st.cache_data
+def load_testset_data() -> list[dict]:
+    """Load evaluation testset from JSON."""
+    if not TESTSET_PATH.exists():
+        return []
+    with open(TESTSET_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 
 def main() -> None:
@@ -124,7 +138,59 @@ def main() -> None:
     fig_bar.update_layout(yaxis_range=[0, 1.1])
     st.plotly_chart(fig_bar, use_container_width=True)
 
+    # Question Inspector Section
+    st.subheader("🔎 Single-Question Inspector")
+    testset = load_testset_data()
+    if testset:
+        question_options = [f"{q['question_id']}: {q['question']}" for q in testset]
+        selected_q_str = st.selectbox("Pick a Question to Inspect", question_options)
+        selected_qid = selected_q_str.split(":")[0]
+        q_data = next((q for q in testset if q["question_id"] == selected_qid), None)
+
+        if q_data:
+            st.info(f"**Ground Truth Document:** `{q_data['doc_id']}` | **Span:** `[{q_data['gt_start_char']}..{q_data['gt_end_char']}]`")
+            st.markdown(f"> **Ground Truth Passage:** {q_data['gt_text']}")
+
+            # Load docs and chunk with selected chunk size
+            insp_cs = int(selected_chunk_size) if selected_chunk_size != "All" else 500
+            insp_tk = int(selected_top_k) if selected_top_k != "All" else 3
+            docs = load_documents(DOCS_DIR)
+            chunks = []
+            for d in docs:
+                chunks.extend(chunk_text(d.content, d.doc_id, insp_cs, int(insp_cs * 0.10)))
+
+            v_ret = VectorRetriever(chunks, "all-MiniLM-L6-v2")
+            b_ret = BM25Retriever(chunks)
+            h_ret = HybridRetriever(v_ret, b_ret)
+
+            inspect_cols = st.columns(3)
+            with inspect_cols[0]:
+                st.markdown("#### 🎯 Vector Retriever")
+                v_results = v_ret.retrieve(q_data["question"], top_k=insp_tk)
+                for item in v_results:
+                    hit = is_hit(item.chunk, q_data["doc_id"], q_data["gt_start_char"], q_data["gt_end_char"])
+                    badge = "✅ HIT" if hit else "❌ MISS"
+                    st.caption(f"Rank {item.rank} ({badge}) | Score: {item.score:.4f} | Span: [{item.chunk.start_char}..{item.chunk.end_char}]")
+                    st.text(item.chunk.text[:200] + "...")
+
+            with inspect_cols[1]:
+                st.markdown("#### 📝 BM25 Retriever")
+                b_results = b_ret.retrieve(q_data["question"], top_k=insp_tk)
+                for item in b_results:
+                    hit = is_hit(item.chunk, q_data["doc_id"], q_data["gt_start_char"], q_data["gt_end_char"])
+                    badge = "✅ HIT" if hit else "❌ MISS"
+                    st.caption(f"Rank {item.rank} ({badge}) | Score: {item.score:.4f} | Span: [{item.chunk.start_char}..{item.chunk.end_char}]")
+                    st.text(item.chunk.text[:200] + "...")
+
+            with inspect_cols[2]:
+                st.markdown("#### 🔀 Hybrid RRF Retriever")
+                h_results = h_ret.retrieve(q_data["question"], top_k=insp_tk)
+                for item in h_results:
+                    hit = is_hit(item.chunk, q_data["doc_id"], q_data["gt_start_char"], q_data["gt_end_char"])
+                    badge = "✅ HIT" if hit else "❌ MISS"
+                    st.caption(f"Rank {item.rank} ({badge}) | RRF Score: {item.score:.4f} | Span: [{item.chunk.start_char}..{item.chunk.end_char}]")
+                    st.text(item.chunk.text[:200] + "...")
+
 
 if __name__ == "__main__":
     main()
-
