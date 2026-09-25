@@ -191,6 +191,41 @@ def main() -> None:
                     st.caption(f"Rank {item.rank} ({badge}) | RRF Score: {item.score:.4f} | Span: [{item.chunk.start_char}..{item.chunk.end_char}]")
                     st.text(item.chunk.text[:200] + "...")
 
+    # Live Search Playground Section
+    st.subheader("🚀 Live Search Playground (Top Config)")
+    best_row = df.sort_values(by=["recall_at_k", "mrr"], ascending=False).iloc[0]
+    best_cs = int(best_row["chunk_size"])
+    best_ret = str(best_row["retriever"])
+    best_emb = "all-MiniLM-L6-v2" if str(best_row["embedder"]).startswith("N/A") else str(best_row["embedder"])
+    best_tk = int(best_row["top_k"])
+
+    st.success(f"**Auto-Selected Best Config:** Chunk Size={best_cs} | Retriever={best_ret} | Embedder={best_emb} | Top K={best_tk}")
+
+    user_query = st.text_input("Enter a custom search query:", placeholder="e.g. How does Reciprocal Rank Fusion work?")
+    if user_query.strip():
+        docs = load_documents(DOCS_DIR)
+        live_chunks = []
+        for d in docs:
+            live_chunks.extend(chunk_text(d.content, d.doc_id, best_cs, int(best_cs * 0.10)))
+
+        with st.spinner("Retrieving relevant passages..."):
+            if best_ret == "vector":
+                r_inst = VectorRetriever(live_chunks, best_emb)
+            elif best_ret == "bm25":
+                r_inst = BM25Retriever(live_chunks)
+            else:
+                vr = VectorRetriever(live_chunks, best_emb)
+                br = BM25Retriever(live_chunks)
+                r_inst = HybridRetriever(vr, br)
+
+            retrieved_items = r_inst.retrieve(user_query, top_k=best_tk)
+
+        st.markdown(f"**Retrieved Top {len(retrieved_items)} Chunks:**")
+        for res in retrieved_items:
+            with st.expander(f"Rank {res.rank} | Doc: {res.chunk.doc_id} | Score: {res.score:.4f} | Span: [{res.chunk.start_char}..{res.chunk.end_char}]"):
+                st.write(res.chunk.text)
+
 
 if __name__ == "__main__":
     main()
+
