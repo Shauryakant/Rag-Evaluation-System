@@ -1,6 +1,7 @@
 """Grid search execution script running all RAG configurations and writing metrics to results.csv."""
 
 import json
+import time
 from pathlib import Path
 from typing import Any, Dict, List
 
@@ -32,11 +33,17 @@ def load_testset() -> List[Dict[str, Any]]:
 
 
 def run_evaluation_grid() -> pd.DataFrame:
-    """Execute evaluation grid search over chunk_sizes, retrievers, embedders, and top_k.
+    """Execute evaluation grid search with optimized index reuse across top_k.
+
+    Performance optimizations:
+    1. BM25 indexes are constructed once per chunk_size and reused.
+    2. FAISS indexes are constructed once per (chunk_size, embedder) and reused across top_k.
+    3. Duplicate BM25 runs across embedders are skipped.
 
     Returns:
         DataFrame containing evaluation results for all configurations.
     """
+    start_time = time.time()
     documents = load_documents(DOCS_DIR)
     if not documents:
         raise ValueError("No documents found in data/docs/")
@@ -50,17 +57,17 @@ def run_evaluation_grid() -> pd.DataFrame:
         for doc in documents:
             chunks.extend(chunk_text(doc.content, doc.doc_id, chunk_size, overlap))
 
-        # Initialize BM25 retriever once per chunk_size
+        # Reused BM25 index across all embedder/top_k loops
         bm25_retriever = BM25Retriever(chunks)
 
         for embedder in EMBEDDERS:
-            # Build/fetch FAISS index once per (chunk_size, embedder)
+            # Reused FAISS index across top_k loops
             faiss_index, _ = get_or_build_faiss_index(chunks, embedder)
             vector_retriever = VectorRetriever(chunks, embedder, index=faiss_index)
             hybrid_retriever = HybridRetriever(vector_retriever, bm25_retriever)
 
             for retriever_type in RETRIEVERS:
-                # BM25 is independent of embedder, skip duplicate evaluation runs
+                # BM25 does not use an embedder: run it once per (chunk_size, top_k)
                 if retriever_type == "bm25" and embedder != EMBEDDERS[0]:
                     continue
 
@@ -103,10 +110,13 @@ def run_evaluation_grid() -> pd.DataFrame:
                         }
                     )
 
+    elapsed = time.time() - start_time
     df = pd.DataFrame(results)
     RESULTS_CSV.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(RESULTS_CSV, index=False)
+    print(f"Grid search completed in {elapsed:.2f} seconds across {len(df)} configs.")
     return df
+
 
 
 if __name__ == "__main__":
