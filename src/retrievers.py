@@ -1,14 +1,28 @@
 """Retrieval algorithms: Vector search, BM25, and Hybrid RRF."""
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
 
 import faiss
 import numpy as np
+from rank_bm25 import BM25Okapi
 
 from src.chunking import Chunk
 from src.embed_index import get_embeddings, get_or_build_faiss_index
+
+
+def _tokenize(text: str) -> List[str]:
+    """Simple regex word tokenizer for BM25.
+
+    Args:
+        text: Input text string.
+
+    Returns:
+        List of lowercase word tokens.
+    """
+    return re.findall(r"\w+", text.lower())
 
 
 @dataclass
@@ -74,3 +88,50 @@ class VectorRetriever:
                 )
             )
         return results
+
+
+class BM25Retriever:
+    """Sparse retriever implementing BM25 ranking algorithm."""
+
+    def __init__(self, chunks: List[Chunk]) -> None:
+        """Initialize BM25Retriever with tokenized corpus.
+
+        Args:
+            chunks: List of Chunk objects to index.
+        """
+        self.chunks = chunks
+        self.tokenized_corpus = [_tokenize(chunk.text) for chunk in chunks]
+        self.bm25 = BM25Okapi(self.tokenized_corpus) if self.tokenized_corpus else None
+
+    def retrieve(self, query: str, top_k: int) -> List[RetrievedChunk]:
+        """Retrieve top_k highest scoring chunks for a query using BM25.
+
+        Args:
+            query: Query text string.
+            top_k: Maximum number of top chunks to return.
+
+        Returns:
+            List of RetrievedChunk objects.
+        """
+        if not self.chunks or not self.bm25 or top_k <= 0 or not query.strip():
+            return []
+
+        tokenized_query = _tokenize(query)
+        if not tokenized_query:
+            return []
+
+        scores = self.bm25.get_scores(tokenized_query)
+        k = min(top_k, len(self.chunks))
+        top_indices = np.argsort(scores)[::-1][:k]
+
+        results: List[RetrievedChunk] = []
+        for rank_idx, idx in enumerate(top_indices, start=1):
+            results.append(
+                RetrievedChunk(
+                    chunk=self.chunks[idx],
+                    score=float(scores[idx]),
+                    rank=rank_idx,
+                )
+            )
+        return results
+

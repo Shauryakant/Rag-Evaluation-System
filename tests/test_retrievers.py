@@ -2,7 +2,7 @@
 
 import pytest
 from src.chunking import Chunk
-from src.retrievers import VectorRetriever
+from src.retrievers import BM25Retriever, VectorRetriever
 
 
 @pytest.fixture
@@ -21,3 +21,13 @@ def test_vector_retriever(sample_chunks):
     assert len(results) == 2
     assert results[0].rank == 1
     assert "Machine learning" in results[0].chunk.text
+
+
+def test_bm25_retriever(sample_chunks):
+    retriever = BM25Retriever(chunks=sample_chunks)
+    results = retriever.retrieve(query="baking cakes", top_k=2)
+
+    assert len(results) == 2
+    assert results[0].rank == 1
+    assert "Cooking recipes" in results[0].chunk.text
+
