@@ -5,9 +5,11 @@ import os
 from pathlib import Path
 from typing import List, Optional
 
+import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
 
+from src.chunking import Chunk
 from src.config import CACHE_DIR
 
 
@@ -89,3 +91,43 @@ def get_embeddings(
 
     np.save(cache_file, embeddings)
     return embeddings
+
+
+def build_faiss_index(embeddings: np.ndarray) -> faiss.IndexFlatIP:
+    """Build a FAISS IndexFlatIP (cosine similarity) index from normalized embeddings.
+
+    Args:
+        embeddings: Float32 numpy array of shape (N, d).
+
+    Returns:
+        FAISS IndexFlatIP index populated with vector embeddings.
+    """
+    if embeddings.size == 0:
+        raise ValueError("Cannot build FAISS index from empty embeddings")
+
+    dimension = embeddings.shape[1]
+    index = faiss.IndexFlatIP(dimension)
+    index.add(embeddings.astype(np.float32))
+    return index
+
+
+def get_or_build_faiss_index(
+    chunks: List[Chunk],
+    model_name: str,
+    cache_dir: Optional[Path] = None,
+) -> tuple[faiss.IndexFlatIP, np.ndarray]:
+    """Get or compute embeddings for chunks and construct a FAISS index.
+
+    Args:
+        chunks: List of Chunk objects to index.
+        model_name: Sentence transformer model identifier.
+        cache_dir: Directory path for caching embeddings.
+
+    Returns:
+        Tuple of (faiss_index, embeddings_matrix).
+    """
+    texts = [chunk.text for chunk in chunks]
+    embeddings = get_embeddings(texts, model_name, cache_dir=cache_dir)
+    index = build_faiss_index(embeddings)
+    return index, embeddings
+
