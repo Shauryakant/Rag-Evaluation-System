@@ -1,6 +1,8 @@
-"""Evaluation metrics for RAG retrieval performance: Recall@k and Mean Reciprocal Rank (MRR)."""
+"""Evaluation metrics for RAG retrieval performance: Recall@k, MRR, and LLM-as-judge Faithfulness."""
 
-from typing import List
+import json
+import re
+from typing import Any, List, Optional
 
 from src.chunking import Chunk
 from src.retrievers import RetrievedChunk
@@ -104,3 +106,52 @@ def mrr(
         if is_hit(item.chunk, gt_doc_id, gt_start_char, gt_end_char):
             return 1.0 / float(item.rank)
     return 0.0
+
+
+def faithfulness_score(
+    answer: str,
+    context_chunks: List[Chunk],
+    llm_client: Optional[Any] = None,
+) -> float:
+    """Compute LLM-as-judge faithfulness score (supported_claims / total_claims).
+
+    Args:
+        answer: Generated answer or ground truth answer text.
+        context_chunks: List of retrieved Chunk context objects.
+        llm_client: Optional GeminiClient instance for LLM claim decomposition.
+
+    Returns:
+        Float score between 0.0 and 1.0.
+    """
+    if not answer or not context_chunks:
+        return 0.0
+
+    context_text = "\n\n".join([c.text for c in context_chunks])
+
+    if llm_client is not None and getattr(llm_client, "api_key", None):
+        prompt = (
+            "You are an objective evaluator measuring faithfulness.\n"
+            "Decompose the Answer into atomic factual claims. For each claim, check if it is SUPPORTED "
+            "or UNSUPPORTED by the Context.\n"
+            "Return JSON in exact format: {\"claims\": [{\"claim\": \"...\", \"status\": \"SUPPORTED\"|\"UNSUPPORTED\"}]}\n\n"
+            f"Context:\n{context_text}\n\nAnswer:\n{answer}"
+        )
+        try:
+            raw = llm_client.generate_text(prompt)
+            match = re.search(r"\{.*\}", raw, re.DOTALL)
+            if match:
+                data = json.loads(match.group(0))
+                claims = data.get("claims", [])
+                if claims:
+                    supported = sum(1 for c in claims if c.get("status") == "SUPPORTED")
+                    return round(supported / len(claims), 4)
+        except Exception:
+            pass
+
+    # Heuristic fallback: word overlap ratio
+    words = [w.lower() for w in re.findall(r"\w+", answer) if len(w) > 3]
+    if not words:
+        return 1.0
+    context_lower = context_text.lower()
+    matches = sum(1 for w in words if w in context_lower)
+    return round(matches / len(words), 4)

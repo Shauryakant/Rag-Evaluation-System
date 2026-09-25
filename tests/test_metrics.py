@@ -1,8 +1,8 @@
-"""Unit tests for metrics module: span-overlap matching, Recall@k, and MRR."""
+"""Unit tests for metrics module: span-overlap matching, Recall@k, MRR, and Faithfulness."""
 
 import pytest
 from src.chunking import Chunk
-from src.metrics import is_hit, is_span_overlap, mrr, recall_at_k
+from src.metrics import faithfulness_score, is_hit, is_span_overlap, mrr, recall_at_k
 from src.retrievers import RetrievedChunk
 
 
@@ -57,3 +57,11 @@ def test_recall_at_k_and_mrr():
     # top_k = 3: first hit remains at rank 2 -> MRR = 0.5
     assert recall_at_k(retrieved, gt_doc, gt_start, gt_end, top_k=3) == 1.0
     assert pytest.approx(mrr(retrieved, gt_doc, gt_start, gt_end, top_k=3)) == 0.5
+
+
+def test_faithfulness_score():
+    chunks = [Chunk("c1", "doc1.txt", "RAG enhances LLMs using vector retrieval.", 0, 50)]
+    answer = "RAG enhances LLMs using vector retrieval."
+
+    score = faithfulness_score(answer, chunks)
+    assert score == 1.0
