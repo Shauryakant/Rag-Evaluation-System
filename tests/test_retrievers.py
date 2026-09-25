@@ -2,7 +2,8 @@
 
 import pytest
 from src.chunking import Chunk
-from src.retrievers import BM25Retriever, VectorRetriever
+from src.config import RRF_K
+from src.retrievers import BM25Retriever, HybridRetriever, VectorRetriever
 
 
 @pytest.fixture
@@ -31,3 +32,15 @@ def test_bm25_retriever(sample_chunks):
     assert results[0].rank == 1
     assert "Cooking recipes" in results[0].chunk.text
 
+
+def test_hybrid_retriever_rrf(sample_chunks):
+    vec_retriever = VectorRetriever(chunks=sample_chunks, model_name="all-MiniLM-L6-v2")
+    bm25_retriever = BM25Retriever(chunks=sample_chunks)
+    hybrid_retriever = HybridRetriever(vector_retriever=vec_retriever, bm25_retriever=bm25_retriever, rrf_k=60)
+
+    results = hybrid_retriever.retrieve(query="machine learning PyTorch", top_k=3)
+    assert len(results) == 3
+    assert results[0].rank == 1
+    # Check score calculation formula 1 / (60 + r)
+    expected_top_score_component = 1.0 / (60 + 1)
+    assert results[0].score >= expected_top_score_component
