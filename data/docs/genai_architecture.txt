@@ -1,0 +1,9 @@
+# Generative AI Systems & Infrastructure
+
+Modern Generative AI architectures rely on Transformer models capable of processing sequence inputs using self-attention mechanisms. Deploying LLM applications in production requires careful management of API keys, context windows, and rate limits.
+
+## Context Windows & Rate Limits
+Every Large Language Model operates within a fixed context window measured in tokens. Providing concise, highly relevant retrieved chunks in RAG prompts preserves token headroom for reasoning and output generation. Furthermore, public LLM APIs enforce Rate Limits (such as Requests Per Minute and Tokens Per Minute). Implementing exponential backoff retries and client-side rate limiting ensures robust execution without hitting HTTP 429 quota exceptions.
+
+## Embedding Models & Dimensionality
+Dense vector embeddings map text strings into high-dimensional numerical spaces (such as 384 dimensions for all-MiniLM-L6-v2 or bge-small-en-v1.5). Dimensionality impacts both storage efficiency and vector comparison latency in FAISS indexes. Normalizing vectors allows inner product operations to calculate exact cosine similarity.

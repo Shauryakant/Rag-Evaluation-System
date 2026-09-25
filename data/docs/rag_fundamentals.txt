@@ -1,0 +1,14 @@
+# Retrieval-Augmented Generation (RAG) Fundamentals
+
+Retrieval-Augmented Generation (RAG) is an architectural pattern that enhances Large Language Models (LLMs) by grounding their generation on external knowledge retrieved from a specialized index or corpus. Instead of relying solely on parametric memory frozen during pre-training, a RAG system dynamically fetches relevant context matching a user prompt.
+
+## Chunking Strategies
+Before text can be indexed into a vector database or sparse inverted index, long documents must be partitioned into smaller segments known as chunks. Fixed-size character chunking splits text into contiguous blocks of a specified character length (such as 200, 500, or 1000 characters). To prevent semantic loss at boundaries, a sliding window overlap (typically 10% of the chunk size) is applied so that context near chunk edges appears in adjacent chunks.
+
+## Vector Search vs BM25 Sparse Search
+Vector search computes dense semantic embeddings using neural network encoder models (such as sentence-transformers like all-MiniLM-L6-v2 or bge-small-en-v1.5). These embeddings capture deep contextual similarity and semantic meaning even when exact keyword matches are absent. Modern vector indexes use libraries like FAISS to perform high-speed nearest-neighbor search.
+
+In contrast, BM25 (Best Matching 25) is a sparse lexical retrieval algorithm based on Term Frequency (TF) and Inverse Document Frequency (IDF). BM25 excels at exact keyword matching, technical terms, acronyms, and proper nouns that dense embedding models might overlook.
+
+## Hybrid Retrieval & Reciprocal Rank Fusion
+Hybrid retrieval combines dense vector search and sparse BM25 retrieval to leverage the strengths of both approaches. Reciprocal Rank Fusion (RRF) is a popular rank aggregation algorithm that merges ranking lists without requiring normalized score calibration across disparate search engines. The RRF score for a chunk is computed as the sum of 1 / (k + rank) across all retrievers, where k is a smoothing constant typically set to 60.
