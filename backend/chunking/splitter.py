@@ -77,33 +77,31 @@ class RecursiveHeadingSplitter:
         heading_matches = list(re.finditer(r"(?m)^(#{1,3})\s+(.+)$", text))
 
         chunks: List[Chunk] = []
-        stride = self.chunk_size - self.chunk_overlap
         start = 0
         chunk_index = 0
 
         while start < text_len:
             target_end = min(start + self.chunk_size, text_len)
-
-            # If not at the very end of document, try to break cleanly at paragraph or sentence boundary
             end = target_end
+
             if target_end < text_len:
-                # Look for paragraph break near target_end (within 20% tolerance of chunk_size)
-                search_window_start = max(start + int(self.chunk_size * 0.7), start)
+                # Search for clean paragraph, heading, sentence, or word boundaries
+                search_window_start = max(start + int(self.chunk_size * 0.3), start)
                 sub_text = text[search_window_start:target_end]
 
                 para_break = sub_text.rfind("\n\n")
                 if para_break != -1:
                     end = search_window_start + para_break + 2
                 else:
-                    # Look for sentence break
-                    sentence_break = max(
-                        sub_text.rfind(". "),
-                        sub_text.rfind(".\n"),
-                        sub_text.rfind("? "),
-                        sub_text.rfind("! "),
-                    )
-                    if sentence_break != -1:
-                        end = search_window_start + sentence_break + 2
+                    # Look for sentence boundaries
+                    sentence_matches = list(re.finditer(r"[.!?]\s+", sub_text))
+                    if sentence_matches:
+                        end = search_window_start + sentence_matches[-1].end()
+                    else:
+                        # Fallback to word boundary
+                        space_break = sub_text.rfind(" ")
+                        if space_break != -1:
+                            end = search_window_start + space_break + 1
 
             chunk_text = text[start:end]
             if chunk_text.strip():
@@ -130,14 +128,11 @@ class RecursiveHeadingSplitter:
             if end >= text_len:
                 break
 
-            # Advance start pointer by stride
-            next_start = start + stride
-            # Ensure forward progress
+            # Advance start pointer with overlap
+            next_start = end - self.chunk_overlap
             if next_start <= start:
                 next_start = start + 1
-            if next_start >= end:
-                next_start = end - self.chunk_overlap
-            start = max(next_start, start + 1)
+            start = next_start
 
         return chunks
 

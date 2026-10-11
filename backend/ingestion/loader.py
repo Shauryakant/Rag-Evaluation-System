@@ -54,16 +54,19 @@ def load_single_document(file_path: Path) -> Document:
     return Document(doc_id=path.name, content=content, path=str(path.resolve()))
 
 
-def load_corpus(corpus_dir: Path) -> List[Document]:
+from backend.config import CORPUS_DIR
+
+
+def load_corpus(corpus_dir: Optional[Path] = None) -> List[Document]:
     """Load all benchmark documents from a directory.
 
     Args:
-        corpus_dir: Path to directory containing corpus documents.
+        corpus_dir: Path to directory containing corpus documents (defaults to CORPUS_DIR).
 
     Returns:
         Sorted list of Document objects.
     """
-    directory = Path(corpus_dir)
+    directory = Path(corpus_dir) if corpus_dir is not None else CORPUS_DIR
     if not directory.exists() or not directory.is_dir():
         return []
 
