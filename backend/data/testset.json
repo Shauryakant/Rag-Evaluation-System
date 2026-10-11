@@ -1,0 +1,322 @@
+[
+  {
+    "id": "q01",
+    "question": "What is the primary function of Retrieval-Augmented Generation?",
+    "document": "01_rag_architecture.md",
+    "expected_answer_spans": [
+      "grounds Large Language Model (LLM) responses on external knowledge retrieved dynamically from indexed document stores."
+    ]
+  },
+  {
+    "id": "q02",
+    "question": "What is the first decoupled stage in an enterprise RAG pipeline?",
+    "document": "01_rag_architecture.md",
+    "expected_answer_spans": [
+      "Extracting raw text from documents (.md, .txt, .pdf) while preserving document metadata and character offsets."
+    ]
+  },
+  {
+    "id": "q03",
+    "question": "How is text segmentation defined in RAG pipelines?",
+    "document": "01_rag_architecture.md",
+    "expected_answer_spans": [
+      "Partitioning long documents into smaller semantic units with boundary overlap."
+    ]
+  },
+  {
+    "id": "q04",
+    "question": "Which indices are created during representation indexing in RAG?",
+    "document": "01_rag_architecture.md",
+    "expected_answer_spans": [
+      "dense vector index for semantic proximity and an inverted index for exact keyword matching."
+    ]
+  },
+  {
+    "id": "q05",
+    "question": "What occurs during the final generation stage of RAG?",
+    "document": "01_rag_architecture.md",
+    "expected_answer_spans": [
+      "Augmenting a system prompt with retrieved context and executing LLM completion."
+    ]
+  },
+  {
+    "id": "q06",
+    "question": "How does advanced two-stage retrieval prevent semantic drift?",
+    "document": "01_rag_architecture.md",
+    "expected_answer_spans": [
+      "high-recall candidate generation is decoupled from precision-oriented cross-encoder reranking."
+    ]
+  },
+  {
+    "id": "q07",
+    "question": "What is the main benefit of using small chunks of 100 to 250 characters?",
+    "document": "02_chunking_strategies.md",
+    "expected_answer_spans": [
+      "Small chunks (100 to 250 characters) capture fine-grained, localized facts with minimal extraneous noise."
+    ]
+  },
+  {
+    "id": "q08",
+    "question": "What drawback do large chunks between 800 and 1500 characters have?",
+    "document": "02_chunking_strategies.md",
+    "expected_answer_spans": [
+      "Large chunks (800 to 1500 characters) provide complete semantic narratives but dilute sentence-level embedding vectors"
+    ]
+  },
+  {
+    "id": "q09",
+    "question": "What chunk size is recommended to balance completeness and specificity?",
+    "document": "02_chunking_strategies.md",
+    "expected_answer_spans": [
+      "A default chunk size of 500 characters balances conceptual completeness and embedding specificity."
+    ]
+  },
+  {
+    "id": "q10",
+    "question": "What sliding window overlap size is commonly used for chunking?",
+    "document": "02_chunking_strategies.md",
+    "expected_answer_spans": [
+      "sliding window overlap (typically 10% of chunk size, such as 50 characters)"
+    ]
+  },
+  {
+    "id": "q11",
+    "question": "Along what structural elements does heading-aware recursive splitting prefer to break text?",
+    "document": "02_chunking_strategies.md",
+    "expected_answer_spans": [
+      "preferring splits along Markdown headers (##, ###) and paragraph boundaries before resorting to character-level slicing."
+    ]
+  },
+  {
+    "id": "q12",
+    "question": "What vector dimension does BAAI/bge-small-en-v1.5 produce via mean pooling?",
+    "document": "03_dense_embeddings.md",
+    "expected_answer_spans": [
+      "384-dimensional dense representation vector through mean pooling over final token hidden states."
+    ]
+  },
+  {
+    "id": "q13",
+    "question": "Why is query-time latency low in bi-encoder architectures?",
+    "document": "03_dense_embeddings.md",
+    "expected_answer_spans": [
+      "query-time latency is restricted to a single forward pass over the user query followed by matrix vector multiplication."
+    ]
+  },
+  {
+    "id": "q14",
+    "question": "Why is L2-normalization applied to dense passage and query embedding vectors?",
+    "document": "03_dense_embeddings.md",
+    "expected_answer_spans": [
+      "L2-normalization to all passage and query embedding vectors, the Euclidean inner product mathematically reduces to cosine similarity"
+    ]
+  },
+  {
+    "id": "q15",
+    "question": "Why does FAISS IndexFlatIP eliminate square-root distance normalizations at query time?",
+    "document": "03_dense_embeddings.md",
+    "expected_answer_spans": [
+      "FAISS IndexFlatIP (Inner Product), which calculates exact cosine similarities without the computational overhead of square-root distance normalizations"
+    ]
+  },
+  {
+    "id": "q16",
+    "question": "Which two parameters are used by the BM25 probabilistic ranking function?",
+    "document": "04_sparse_lexical_bm25.md",
+    "expected_answer_spans": [
+      "k1 (term saturation) and b (document length penalty)."
+    ]
+  },
+  {
+    "id": "q17",
+    "question": "What does the k1 parameter control in BM25 scoring?",
+    "document": "04_sparse_lexical_bm25.md",
+    "expected_answer_spans": [
+      "Term Frequency Saturation (k1, typically 1.5): Governs how quickly the score saturates as a query term repeats within a passage."
+    ]
+  },
+  {
+    "id": "q18",
+    "question": "How does BM25 length normalization parameter b penalize verbose passages?",
+    "document": "04_sparse_lexical_bm25.md",
+    "expected_answer_spans": [
+      "Length Normalization (b, typically 0.75): Penalizes overly verbose passages by scaling term frequency relative to average document length"
+    ]
+  },
+  {
+    "id": "q19",
+    "question": "On what categories of tokens do dense vector models commonly struggle?",
+    "document": "04_sparse_lexical_bm25.md",
+    "expected_answer_spans": [
+      "Dense vector models often fail on rare tokens, part numbers, domain acronyms, and proper nouns that appear infrequently in pre-training data."
+    ]
+  },
+  {
+    "id": "q20",
+    "question": "Why is BM25 an essential complement to semantic vector search?",
+    "document": "04_sparse_lexical_bm25.md",
+    "expected_answer_spans": [
+      "BM25 provides exact keyword retrieval precision, making it an essential complement to semantic vector search."
+    ]
+  },
+  {
+    "id": "q21",
+    "question": "What is the discrepancy between dense cosine similarity and BM25 score scales?",
+    "document": "05_hybrid_search_rrf.md",
+    "expected_answer_spans": [
+      "Dense cosine similarities range from 0.0 to 1.0 (or -1.0 to 1.0), whereas BM25 produces unbounded positive floating-point scores"
+    ]
+  },
+  {
+    "id": "q22",
+    "question": "Why is linear combination of dense and BM25 scores brittle?",
+    "document": "05_hybrid_search_rrf.md",
+    "expected_answer_spans": [
+      "Linear score combination (alpha * dense + (1 - alpha) * sparse) requires extensive empirical parameter tuning"
+    ]
+  },
+  {
+    "id": "q23",
+    "question": "How does Reciprocal Rank Fusion bypass score scale discrepancies?",
+    "document": "05_hybrid_search_rrf.md",
+    "expected_answer_spans": [
+      "Reciprocal Rank Fusion bypasses score scale discrepancies by aggregating rank positions rather than raw scores."
+    ]
+  },
+  {
+    "id": "q24",
+    "question": "What is the mathematical formula for Reciprocal Rank Fusion?",
+    "document": "05_hybrid_search_rrf.md",
+    "expected_answer_spans": [
+      "RRF_Score(d) = sum(1 / (k + rank_m(d))) for m in M"
+    ]
+  },
+  {
+    "id": "q25",
+    "question": "What is the role of smoothing constant k=60 in RRF?",
+    "document": "05_hybrid_search_rrf.md",
+    "expected_answer_spans": [
+      "smoothing constant k (conventionally set to 60) dampens the impact of top-ranked outliers"
+    ]
+  },
+  {
+    "id": "q26",
+    "question": "What structural limitation prevents bi-encoders from performing cross-attention?",
+    "document": "06_cross_encoder_rerankers.md",
+    "expected_answer_spans": [
+      "Bi-encoders cannot model cross-attention interactions between individual query words and document tokens."
+    ]
+  },
+  {
+    "id": "q27",
+    "question": "How does a cross-encoder format its input sequence?",
+    "document": "06_cross_encoder_rerankers.md",
+    "expected_answer_spans": [
+      "concatenated pair [CLS] Query [SEP] Passage [SEP] through a single transformer model (such as ms-marco-MiniLM-L-6-v2)."
+    ]
+  },
+  {
+    "id": "q28",
+    "question": "Why does full cross-attention produce higher ranking fidelity than a bi-encoder?",
+    "document": "06_cross_encoder_rerankers.md",
+    "expected_answer_spans": [
+      "Full cross-attention allows every query token to attend directly to every passage token across all transformer layers"
+    ]
+  },
+  {
+    "id": "q29",
+    "question": "How many candidates does the first-stage retriever typically retrieve before reranking?",
+    "document": "06_cross_encoder_rerankers.md",
+    "expected_answer_spans": [
+      "first-stage retriever (dense, BM25, or hybrid) fetches the top 20 candidates in under 15ms"
+    ]
+  },
+  {
+    "id": "q30",
+    "question": "How much CPU latency does cross-encoder reranking typically add to a search request?",
+    "document": "06_cross_encoder_rerankers.md",
+    "expected_answer_spans": [
+      "cross-encoder scores and reorders only those 20 candidates, adding 50 to 150ms of CPU latency."
+    ]
+  },
+  {
+    "id": "q31",
+    "question": "How is Hit Rate@K defined in information retrieval?",
+    "document": "07_retrieval_metrics.md",
+    "expected_answer_spans": [
+      "Hit Rate@K: Proportion of queries where at least one ground-truth passage appears in the top-K retrieved list."
+    ]
+  },
+  {
+    "id": "q32",
+    "question": "When does Recall@K equal Hit Rate@K?",
+    "document": "07_retrieval_metrics.md",
+    "expected_answer_spans": [
+      "For queries with a single ground-truth passage, Recall@K equals Hit Rate@K."
+    ]
+  },
+  {
+    "id": "q33",
+    "question": "How does Mean Reciprocal Rank (MRR) evaluate ranking accuracy?",
+    "document": "07_retrieval_metrics.md",
+    "expected_answer_spans": [
+      "Mean Reciprocal Rank (MRR): Evaluates ranking accuracy by computing the reciprocal rank of the first relevant hit: 1 / rank."
+    ]
+  },
+  {
+    "id": "q34",
+    "question": "What MRR values are scored when the first hit appears at rank 1 versus rank 2?",
+    "document": "07_retrieval_metrics.md",
+    "expected_answer_spans": [
+      "If the first relevant passage is at rank 1, MRR is 1.0; at rank 2, MRR is 0.5."
+    ]
+  },
+  {
+    "id": "q35",
+    "question": "How is Precision@K mathematically calculated?",
+    "document": "07_retrieval_metrics.md",
+    "expected_answer_spans": [
+      "Precision@K measures the proportion of retrieved passages in top-K that are relevant: relevant_in_k / k."
+    ]
+  },
+  {
+    "id": "q36",
+    "question": "What is the structural theoretical maximum for Precision@k at k=5 and k=10 when there is only 1 relevant passage?",
+    "document": "07_retrieval_metrics.md",
+    "expected_answer_spans": [
+      "at k=5, the theoretical maximum precision is 1/5 = 0.20 (or 2/5 = 0.40). At k=10, the maximum is 0.10."
+    ]
+  },
+  {
+    "id": "q37",
+    "question": "How long does query string encoding with BGE-small take on CPU?",
+    "document": "08_production_serving_latencies.md",
+    "expected_answer_spans": [
+      "Encoding the query string with BGE-small on CPU takes 10 to 30 milliseconds."
+    ]
+  },
+  {
+    "id": "q38",
+    "question": "What is the typical execution latency for FAISS IndexFlatIP on small-to-medium corpora?",
+    "document": "08_production_serving_latencies.md",
+    "expected_answer_spans": [
+      "Querying FAISS IndexFlatIP (exact cosine) across small to medium corpora takes under 5 milliseconds."
+    ]
+  },
+  {
+    "id": "q39",
+    "question": "What latency does second-stage Cross-Encoder reranking introduce on CPU for 20 candidates?",
+    "document": "08_production_serving_latencies.md",
+    "expected_answer_spans": [
+      "Scoring top-20 candidate pairs on CPU takes 60 to 180 milliseconds."
+    ]
+  },
+  {
+    "id": "q40",
+    "question": "How can container boot latency stalls be avoided on serverless hosting?",
+    "document": "08_production_serving_latencies.md",
+    "expected_answer_spans": [
+      "Baking pre-downloaded model weights and pre-computed FAISS index caches directly into the container image eliminates runtime download stalls"
+    ]
+  }
+]
