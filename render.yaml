@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: rag-eval-lab-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: ALLOWED_ORIGINS
+        value: "http://localhost:3000,https://rag-eval-lab.vercel.app"
+      - key: GROQ_API_KEY
+        sync: false
