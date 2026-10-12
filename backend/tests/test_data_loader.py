@@ -12,8 +12,8 @@ def test_load_corpus():
     docs = load_corpus(CORPUS_DIR)
     assert len(docs) >= 8
     doc_ids = [d.doc_id for d in docs]
-    assert "01_rag_architecture.md" in doc_ids
-    assert "02_chunking_strategies.md" in doc_ids
+    assert "normans.md" in doc_ids
+    assert "oxygen.md" in doc_ids
 
 
 def test_all_testset_spans_present_in_corpus():

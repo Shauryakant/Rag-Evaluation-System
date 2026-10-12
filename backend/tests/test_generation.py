@@ -70,9 +70,10 @@ def test_groq_generator_mocked_api(sample_retrieved_chunk):
     mock_completion.usage.completion_tokens = 12
     mock_completion.usage.total_tokens = 57
 
-    with patch.object(generator, "_client", MagicMock()) as mock_client:
-        mock_client.chat.completions.create.return_value = mock_completion
+    mock_client = MagicMock()
+    mock_client.chat.completions.create.return_value = mock_completion
 
+    with patch.object(GroqGenerator, "client", new=mock_client):
         res = generator.generate(
             query="What is IndexFlatIP?",
             retrieved_chunks=[sample_retrieved_chunk],

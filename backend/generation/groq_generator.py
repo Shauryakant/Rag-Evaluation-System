@@ -44,6 +44,9 @@ class GroqGenerator:
 
     def get_api_key(self) -> str:
         """Resolve API key dynamically from instance, environment, or .env file."""
+        if self.api_key is not None:
+            return self.api_key
+
         import os
         from dotenv import load_dotenv
         from backend.config import BASE_DIR, ROOT_DIR
@@ -51,7 +54,7 @@ class GroqGenerator:
         # Dynamically reload .env in case user updated it during runtime
         load_dotenv(dotenv_path=ROOT_DIR / ".env", override=True)
         load_dotenv(dotenv_path=BASE_DIR / ".env", override=True)
-        return os.getenv("GROQ_API_KEY", "") or self.api_key or ""
+        return os.getenv("GROQ_API_KEY", "") or ""
 
     @property
     def client(self) -> Optional[Groq]:
