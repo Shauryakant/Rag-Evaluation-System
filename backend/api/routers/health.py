@@ -18,5 +18,5 @@ def get_health(state: AppState = Depends(get_app_state)) -> HealthResponse:
         total_chunks=len(state.chunks),
         embedder_model=EMBEDDER_MODEL_NAME,
         reranker_model=RERANKER_MODEL_NAME,
-        groq_configured=bool(GROQ_API_KEY),
+        groq_configured=bool(state.generator.get_api_key()),
     )

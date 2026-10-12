@@ -40,12 +40,28 @@ class GroqGenerator:
         self.api_key = api_key if api_key is not None else GROQ_API_KEY
         self.model_name = model_name
         self._client: Optional[Groq] = None
+        self._cached_key: Optional[str] = None
+
+    def get_api_key(self) -> str:
+        """Resolve API key dynamically from instance, environment, or .env file."""
+        import os
+        from dotenv import load_dotenv
+        from backend.config import BASE_DIR, ROOT_DIR
+
+        # Dynamically reload .env in case user updated it during runtime
+        load_dotenv(dotenv_path=ROOT_DIR / ".env", override=True)
+        load_dotenv(dotenv_path=BASE_DIR / ".env", override=True)
+        return os.getenv("GROQ_API_KEY", "") or self.api_key or ""
 
     @property
     def client(self) -> Optional[Groq]:
-        """Lazy initialization of Groq client if API key is configured."""
-        if self._client is None and self.api_key:
-            self._client = Groq(api_key=self.api_key)
+        """Lazy initialization of Groq client, updating if API key changes."""
+        active_key = self.get_api_key()
+        if not active_key:
+            return None
+        if self._client is None or self._cached_key != active_key:
+            self._client = Groq(api_key=active_key)
+            self._cached_key = active_key
         return self._client
 
     def generate(
@@ -71,7 +87,7 @@ class GroqGenerator:
         start_time = time.perf_counter()
 
         # If no API key is provided, gracefully return synthesized mock response for offline testing
-        if not self.api_key or self.client is None:
+        if not self.get_api_key() or self.client is None:
             synth_latency = round((time.perf_counter() - start_time) * 1000.0, 2)
             if retrieved_chunks:
                 top_c = retrieved_chunks[0].chunk
@@ -91,19 +107,58 @@ class GroqGenerator:
                 total_tokens=len(user_message.split()) + len(mock_answer.split()),
             )
 
-        # Call live Groq API
-        chat_completion = self.client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_message},
-            ],
-            model=self.model_name,
-            temperature=temperature,
-            max_tokens=max_tokens,
-        )
+        # Call live Groq API with automatic model fallback
+        candidate_models = [
+            self.model_name,
+            "openai/gpt-oss-120b",
+            "openai/gpt-oss-20b",
+            "qwen/qwen3.8-27b",
+            "llama-3.1-8b-instant",
+            "llama3-8b-8192",
+        ]
+        # Deduplicate while preserving priority
+        seen = set()
+        model_list = [m for m in candidate_models if not (m in seen or seen.add(m))]
+
+        chat_completion = None
+        used_model = self.model_name
+        last_error = None
+
+        for model_cand in model_list:
+            try:
+                chat_completion = self.client.chat.completions.create(
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_message},
+                    ],
+                    model=model_cand,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                )
+                used_model = model_cand
+                break
+            except Exception as e:
+                last_error = e
+                continue
 
         generation_ms = round((time.perf_counter() - start_time) * 1000.0, 2)
+
+        if chat_completion is None:
+            # Fallback if all models returned errors
+            error_msg = f"[Groq API Error]: {last_error}"
+            return GenerationResult(
+                answer=error_msg,
+                model="groq-error-fallback",
+                generation_ms=generation_ms,
+                prompt_tokens=len(user_message.split()),
+                completion_tokens=len(error_msg.split()),
+                total_tokens=len(user_message.split()) + len(error_msg.split()),
+            )
+
         answer = chat_completion.choices[0].message.content or ""
+        # Some reasoning models return content or reasoning fields
+        if not answer.strip() and hasattr(chat_completion.choices[0].message, "reasoning"):
+            answer = getattr(chat_completion.choices[0].message, "reasoning", "") or ""
 
         usage = chat_completion.usage
         prompt_tokens = usage.prompt_tokens if usage else 0
@@ -112,7 +167,7 @@ class GroqGenerator:
 
         return GenerationResult(
             answer=answer,
-            model=self.model_name,
+            model=used_model,
             generation_ms=generation_ms,
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,

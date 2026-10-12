@@ -6,9 +6,13 @@ from typing import List
 
 from dotenv import load_dotenv
 
-load_dotenv()
-
 BASE_DIR: Path = Path(__file__).resolve().parent
+ROOT_DIR: Path = BASE_DIR.parent
+
+# Load environment variables from project root and backend directories
+load_dotenv(dotenv_path=ROOT_DIR / ".env")
+load_dotenv(dotenv_path=BASE_DIR / ".env")
+load_dotenv()
 DATA_DIR: Path = BASE_DIR / "data"
 CORPUS_DIR: Path = DATA_DIR / "corpus"
 TESTSET_PATH: Path = DATA_DIR / "testset.json"
@@ -33,7 +37,7 @@ RRF_K: int = 60
 
 # Generation (Groq)
 GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
-GROQ_MODEL_NAME: str = os.getenv("GROQ_MODEL_NAME", "llama-3.1-8b-instant")
+GROQ_MODEL_NAME: str = os.getenv("GROQ_MODEL_NAME", "openai/gpt-oss-120b")
 
 # CORS Allowed Origins
 _allowed_origins_raw = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
