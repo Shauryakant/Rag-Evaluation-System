@@ -15,10 +15,10 @@ import {
 } from "lucide-react";
 
 const SAMPLE_QUERIES = [
-  "What is the mathematical equation for Reciprocal Rank Fusion (RRF)?",
-  "Why does FAISS IndexFlatIP compute exact cosine similarity without normalization overhead?",
-  "What are the chunk size trade-offs between context completeness and embedding specificity?",
-  "How does BM25Okapi prevent term frequency saturation?",
+  "In what country is Normandy located and who were the Normans?",
+  "What is the principle of operation of a reciprocating steam engine?",
+  "What role does oxygen play in cellular respiration and combustion?",
+  "How is computational complexity theory distinguished from computability theory?",
 ];
 
 export default function QueryPage() {
