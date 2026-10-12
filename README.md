@@ -59,53 +59,58 @@ flowchart TD
 
 ---
 
-## 📊 Real Measured Benchmark Results
+## 📊 Real Measured Benchmark Results (SQuAD Wikipedia Benchmark)
 
-All figures below are **real empirical measurements** generated over our 40-question benchmark set:
+All figures below are **real empirical measurements** generated across **633 real Wikipedia chunks** and **40 human-verified questions** from SQuAD v2.0:
 
 | Retriever | Top K | CrossEncoder Reranker | Recall@K | MRR | Hit Rate | Precision@K | Latency (CPU) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Dense (FAISS)** | 3 | Off | 0.8750 | 0.7583 | 0.8750 | 0.2916 | 17.25 ms |
-| **Dense (FAISS)** | 3 | **On** | **0.9750** | **0.9375** | **0.9750** | 0.3250 | 484.81 ms |
-| **Dense (FAISS)** | 5 | Off | 0.9500 | 0.7733 | 0.9500 | 0.1900 | **0.36 ms** |
-| **Dense (FAISS)** | 5 | **On** | **0.9750** | **0.9375** | **0.9750** | 0.1950 | 316.67 ms |
-| **Dense (FAISS)** | 10 | Off | 0.9750 | 0.7761 | 0.9750 | 0.0975 | 0.88 ms |
-| **Dense (FAISS)** | 10 | **On** | 0.9750 | **0.9375** | 0.9750 | 0.0975 | 655.84 ms |
-| **Sparse (BM25)** | 3 | Off | 0.9500 | 0.8875 | 0.9500 | 0.3166 | 0.49 ms |
-| **Sparse (BM25)** | 3 | **On** | **0.9750** | **0.9375** | **0.9750** | 0.3250 | 465.76 ms |
-| **Sparse (BM25)** | 5 | Off | 0.9750 | 0.8938 | 0.9750 | 0.1950 | **0.38 ms** |
-| **Sparse (BM25)** | 5 | **On** | **0.9750** | **0.9375** | **0.9750** | 0.1950 | 454.76 ms |
-| **Sparse (BM25)** | 10 | Off | 0.9750 | 0.8938 | 0.9750 | 0.0975 | 0.37 ms |
-| **Sparse (BM25)** | 10 | **On** | 0.9750 | **0.9375** | 0.9750 | 0.0975 | 658.00 ms |
-| **Hybrid (RRF)** | 3 | Off | 0.9750 | 0.8250 | 0.9750 | 0.3250 | 1.46 ms |
-| **Hybrid (RRF)** | 3 | **On** | **0.9750** | **0.9375** | **0.9750** | 0.3250 | 449.29 ms |
-| **Hybrid (RRF)** | 5 | Off | 0.9750 | 0.8250 | 0.9750 | 0.1950 | 1.39 ms |
-| **Hybrid (RRF)** | 5 | **On** | **0.9750** | **0.9375** | **0.9750** | 0.1950 | 453.49 ms |
-| **Hybrid (RRF)** | 10 | Off | **1.0000** | 0.8275 | **1.0000** | 0.1000 | **1.42 ms** |
-| **Hybrid (RRF)** | 10 | **On** | 0.9750 | **0.9375** | 0.9750 | 0.0975 | 664.37 ms |
+| **Dense (FAISS)** | 3 | Off | 0.7500 | 0.6667 | 0.7500 | 0.2500 | 20.76 ms |
+| **Dense (FAISS)** | 3 | **On** | **0.9250** | **0.8458** | **0.9250** | 0.3083 | 519.98 ms |
+| **Dense (FAISS)** | 5 | Off | 0.8500 | 0.6904 | 0.8500 | 0.1700 | **1.03 ms** |
+| **Dense (FAISS)** | 5 | **On** | **0.9250** | **0.8458** | **0.9250** | 0.1850 | 281.62 ms |
+| **Dense (FAISS)** | 10 | Off | 0.9250 | 0.7005 | 0.9250 | 0.0925 | **0.61 ms** |
+| **Dense (FAISS)** | 10 | **On** | 0.9250 | **0.8458** | 0.9250 | 0.0925 | 391.40 ms |
+| **Sparse (BM25)** | 3 | Off | 0.7500 | 0.6417 | 0.7500 | 0.2500 | 1.73 ms |
+| **Sparse (BM25)** | 3 | **On** | 0.8750 | 0.8250 | 0.8750 | 0.2916 | 285.43 ms |
+| **Sparse (BM25)** | 5 | Off | 0.8000 | 0.6517 | 0.8000 | 0.1600 | 1.52 ms |
+| **Sparse (BM25)** | 5 | **On** | 0.8750 | 0.8250 | 0.8750 | 0.1750 | 285.71 ms |
+| **Sparse (BM25)** | 10 | Off | 0.8500 | 0.6576 | 0.8500 | 0.0850 | 1.44 ms |
+| **Sparse (BM25)** | 10 | **On** | **0.9750** | **0.8644** | **0.9750** | 0.0975 | 391.02 ms |
+| **Hybrid (RRF)** | 3 | Off | 0.7750 | 0.6458 | 0.7750 | 0.2583 | 2.56 ms |
+| **Hybrid (RRF)** | 3 | **On** | **0.9250** | **0.8458** | **0.9250** | 0.3083 | 285.15 ms |
+| **Hybrid (RRF)** | 5 | Off | **0.8750** | 0.6683 | **0.8750** | 0.1750 | **2.68 ms** |
+| **Hybrid (RRF)** | 5 | **On** | **0.9250** | **0.8458** | **0.9250** | 0.1850 | 308.57 ms |
+| **Hybrid (RRF)** | 10 | Off | **0.9500** | 0.6778 | **0.9500** | 0.0950 | **2.67 ms** |
+| **Hybrid (RRF)** | 10 | **On** | 0.9250 | **0.8458** | 0.9250 | 0.0925 | 390.25 ms |
 
 ---
 
-## 💡 Core Empirical Finding
+## 💡 Core Empirical Findings
 
-> **Hybrid Retrieval (Reciprocal Rank Fusion $k=60$) achieves 100% Hit Rate and 1.0000 Recall@10 in only 1.42 ms on CPU without reranking.**  
-> While the CrossEncoder reranker (`ms-marco-MiniLM-L-6-v2`) elevates Dense MRR from **0.758 to 0.938**, it adds **~316ms to 650ms** of CPU latency per query (~28x to 450x slower). Therefore, reranking is implemented strictly as an **opt-in** parameter rather than a hidden latency penalty.
+> **1. Hybrid RRF ($k=10$) delivers 95.0% Recall in 2.67 ms on CPU.**  
+> Reciprocal Rank Fusion ($k_{rrf}=60$) effectively fuses dense semantic representation with BM25 keyword matching, retrieving relevant passages with high recall across 633 chunks in sub-3ms latency.  
+>  
+> **2. CrossEncoder Reranking Trade-Off:**  
+> The CrossEncoder reranker (`ms-marco-MiniLM-L-6-v2`) boosts Mean Reciprocal Rank (MRR) from **0.678 to 0.846–0.864** (with Sparse+Rerank hitting **97.5% Recall**), but adds **~280ms to 520ms** of CPU latency per query (>100x slower). Reranking is therefore strictly opt-in.
 
 ### Understanding the Precision@K Structural Ceiling
-Notice that Precision@K decreases from ~0.32 at $K=3$ to ~0.19 at $K=5$ and ~0.09 at $K=10$. This is mathematically expected: because each query in a targeted benchmark has 1-2 relevant passages in the corpus, retrieving $K$ passages structurally bounds Precision to $\le |GT| / K$. **Recall@K** and **MRR** are the primary signals of retrieval effectiveness.
+Notice that Precision@K naturally scales as ~0.25 at $K=3$, ~0.17 at $K=5$, and ~0.09 at $K=10$. This is mathematically expected: in targeted benchmark datasets where each question has 1-2 ground-truth passages in the corpus, retrieving $K$ passages structurally bounds Precision to $\le |GT| / K$. **Recall@K** and **MRR** are the primary signals of retrieval quality.
 
 ---
 
 ## 🛠️ Tech Stack & Directory Layout
 
-- **Backend:** Python 3.11, FastAPI, Pydantic, `sentence-transformers` (`BAAI/bge-small-en-v1.5`), `faiss-cpu` (`IndexFlatIP`), `rank_bm25`, `CrossEncoder` (`cross-encoder/ms-marco-MiniLM-L-6-v2`), `groq` (`llama-3.1-8b-instant`), `pytest`.
+- **Backend:** Python 3.11, FastAPI, Pydantic, `sentence-transformers` (`BAAI/bge-small-en-v1.5`), `faiss-cpu` (`IndexFlatIP`), `rank_bm25`, `CrossEncoder` (`cross-encoder/ms-marco-MiniLM-L-6-v2`), `groq` (`openai/gpt-oss-120b`), `pytest`.
 - **Frontend:** Next.js 15 (App Router), TypeScript, TanStack Query, Tailwind CSS, Lucide Icons.
 
 ```
 rag-eval-lab/
 ├── backend/
 │   ├── config.py                 # Central settings & env definitions
-│   ├── ingestion/loader.py       # Corpus document loader
+│   ├── ingestion/
+│   │   ├── loader.py             # Corpus document loader
+│   │   └── ingest_squad.py       # SQuAD v2.0 real Wikipedia ingestion pipeline
 │   ├── chunking/splitter.py      # Recursive heading-aware text splitter
 │   ├── embeddings/embedder.py    # bge-small with SHA-256 disk cache
 │   ├── retrieval/
@@ -116,14 +121,14 @@ rag-eval-lab/
 │   │   └── service.py            # Unified RetrievalService (identical code path)
 │   ├── generation/
 │   │   ├── prompt_builder.py     # Grounded prompt construction & citation formatting
-│   │   └── groq_generator.py     # Llama 3 generation with offline fallback
+│   │   └── groq_generator.py     # Groq LLM generation with dynamic reload & model fallback
 │   ├── evaluation/
 │   │   ├── ground_truth.py       # Span-based live index ground truth resolver
 │   │   ├── metrics.py            # Pure IR metrics (precision, recall, mrr, hit_rate)
 │   │   └── benchmark_runner.py   # 18-config parameter sweep runner
 │   ├── api/                      # FastAPI routers (query, evaluation, benchmarks, health)
-│   ├── data/corpus/              # 8 technical benchmark documents
-│   ├── data/testset.json         # 40 labelled questions with verbatim text spans
+│   ├── data/corpus/              # 8 real Wikipedia articles (Normans, Steam Engine, etc.)
+│   ├── data/testset.json         # 40 human-verified SQuAD questions with verbatim spans
 │   ├── results/benchmark.csv     # Precomputed benchmark sweep results
 │   ├── tests/                    # 42 unit and integration tests (100% pass)
 │   ├── Dockerfile
