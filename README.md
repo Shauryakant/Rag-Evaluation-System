@@ -57,6 +57,23 @@ flowchart TD
    - Full parameter sweep matrix across 18 configurations (`retriever × top_k × reranker`).
    - One-click CSV export (`/api/benchmarks/csv`).
 
+## 📚 Benchmark Corpus & Ground Truth (Real Wikipedia Data)
+
+Unlike synthetic question-answer toys, `rag-eval-lab` is evaluated against **real-world Wikipedia articles** extracted from Stanford's **SQuAD v2.0** benchmark:
+
+- **8 Real Wikipedia Articles** (`backend/data/corpus/`):
+  - `normans.md` — Norman history, conquests, and cultural impact
+  - `computational_complexity_theory.md` — P vs NP, complexity classes, and reduction theory
+  - `steam_engine.md` — Thermodynamic cycles, Watt engines, and industrial revolution history
+  - `oxygen.md` — Molecular chemistry, allotropes, photosynthesis, and respiration
+  - `huguenot.md` — French Protestant Reformation and historical diaspora
+  - `southern_california.md` — Geography, climate, urban demographics, and economy
+  - `victoria_australia.md` — Australian colonial history, gold rush, and regional governance
+  - `sky_united_kingdom.md` — Commercial broadcasting, satellite television, and digital platforms
+- **Corpus Scale:** **633 chunks** (~204,485 raw characters) processed via heading-aware recursive chunking (chunk size 500, overlap 50).
+- **40 Labelled Benchmark Questions** (`backend/data/testset.json`): Human-verified technical queries with exact **verbatim text spans**.
+- **Dynamic Span Resolution (Design Rule 1):** Ground truth is anchored to exact substring spans rather than fragile chunk IDs. If chunking parameters change, ground truth chunks are re-resolved dynamically on the fly. Missing or ambiguous spans raise explicit runtime assertion errors.
+
 ---
 
 ## 📊 Real Measured Benchmark Results (SQuAD Wikipedia Benchmark)
@@ -159,13 +176,21 @@ python -m venv venv
 # Windows: venv\Scripts\activate | Unix: source venv/bin/activate
 pip install -r backend/requirements.txt
 
-# Run test suite (42 tests)
+# Configure environment variables (optional for retrieval/benchmarks, required for live LLM generation)
+cp .env.example .env
+# Edit .env and set your GROQ_API_KEY (supports free-tier keys from console.groq.com)
+
+# (Optional) Re-ingest SQuAD Wikipedia corpus and regenerate 40-question benchmark testset
+python -m backend.ingestion.ingest_squad
+
+# Run the full test suite (42 unit and integration tests)
 pytest backend/tests/
 
 # Start FastAPI backend server
 uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
 ```
-*Backend Swagger Docs:* `http://localhost:8000/docs`
+*Backend Swagger Docs:* `http://localhost:8000/docs`  
+*Note:* FAISS, BM25, and CrossEncoder reranking are **100% local and offline**. If no `GROQ_API_KEY` is provided, retrieval and benchmarking work completely; only live grounded generation in `/query` will be disabled.
 
 ### 2. Frontend Setup
 ```bash
