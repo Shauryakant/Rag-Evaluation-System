@@ -12,6 +12,8 @@ ENV/
 
 # Disk cache for embeddings & indexes
 cache/
+backend/cache/*
+!backend/cache/emb_BAAI_bge-small-en-v1.5_907fad0edf92ce5a.npy
 
 # Testing & Pytest
 .pytest_cache/

@@ -50,6 +50,8 @@ def init_app_state() -> AppState:
             generator=generator,
             test_cases=test_cases,
         )
+        import gc
+        gc.collect()
         print("[API] Application state successfully initialized.")
     return _APP_STATE
 

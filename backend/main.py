@@ -1,7 +1,13 @@
 """FastAPI backend application for rag-eval-lab."""
 
+import gc
+import threading
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
+
+import torch
+# Set PyTorch to 1 CPU thread to prevent memory amplification on 512MB cloud tiers
+torch.set_num_threads(1)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,10 +19,9 @@ from backend.config import ALLOWED_ORIGINS
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    """Lifespan context initializing corpus and indices on server boot."""
+    """Lifespan context initializing corpus and indices asynchronously on server boot."""
     print("[rag-eval-lab] Starting backend server...")
-    init_app_state()
-    print("[rag-eval-lab] Ready to serve queries and evaluations.")
+    threading.Thread(target=init_app_state, daemon=True).start()
     yield
     print("[rag-eval-lab] Shutting down backend server.")
 
