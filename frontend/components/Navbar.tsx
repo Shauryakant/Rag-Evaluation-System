@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useHealth } from "@/hooks/useRag";
-import { Activity, BarChart2, Cpu, FileSearch, Layers, Sparkles } from "lucide-react";
+import { Activity, BarChart2, Cpu, FileSearch, FileUp, Layers, Sparkles } from "lucide-react";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -13,6 +13,7 @@ export default function Navbar() {
   const navLinks = [
     { href: "/", label: "Overview", icon: Layers },
     { href: "/query", label: "Query", icon: FileSearch },
+    { href: "/pdf-lab", label: "PDF Lab", icon: FileUp },
     { href: "/evaluation", label: "Evaluation Lab", icon: Activity },
     { href: "/benchmarks", label: "Benchmarks", icon: BarChart2 },
     { href: "/about", label: "About & ADRs", icon: Cpu },

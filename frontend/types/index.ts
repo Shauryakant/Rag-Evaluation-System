@@ -109,3 +109,49 @@ export interface HealthResponse {
   reranker_model: string;
   groq_configured: boolean;
 }
+
+export interface SessionUploadResponse {
+  session_id: string;
+  filename: string;
+  page_count: number;
+  char_count: number;
+  chunk_count: number;
+  sample_questions: string[];
+  preview_chunks: ChunkDTO[];
+  message: string;
+}
+
+export interface SessionDetailResponse {
+  session_id: string;
+  filename: string;
+  page_count: number;
+  char_count: number;
+  chunk_count: number;
+  sample_questions: string[];
+  chunks: ChunkDTO[];
+  created_at: number;
+  last_accessed: number;
+}
+
+export interface CompareConfigDTO {
+  label: string;
+  retriever: RetrieverType;
+  top_k: number;
+  use_reranker: boolean;
+}
+
+export interface CompareRequest {
+  query: string;
+  config_a: CompareConfigDTO;
+  config_b: CompareConfigDTO;
+}
+
+export interface CompareResponse {
+  query: string;
+  result_a: QueryResponse;
+  result_b: QueryResponse;
+  chunk_overlap_percentage: number;
+  shared_chunk_count: number;
+  total_unique_chunks: number;
+  latency_difference_ms: number;
+}

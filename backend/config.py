@@ -13,6 +13,10 @@ ROOT_DIR: Path = BASE_DIR.parent
 load_dotenv(dotenv_path=ROOT_DIR / ".env")
 load_dotenv(dotenv_path=BASE_DIR / ".env")
 load_dotenv()
+
+# Prevent HuggingFace hub from network retries if offline/sandboxed
+os.environ.setdefault("HF_HUB_OFFLINE", "1")
+os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
 DATA_DIR: Path = BASE_DIR / "data"
 CORPUS_DIR: Path = DATA_DIR / "corpus"
 TESTSET_PATH: Path = DATA_DIR / "testset.json"

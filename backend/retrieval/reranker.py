@@ -14,6 +14,8 @@ _LOADED_RERANKERS: Dict[str, CrossEncoder] = {}
 def load_cross_encoder(model_name: str = RERANKER_MODEL_NAME) -> CrossEncoder:
     """Lazy-load and cache CrossEncoder models in memory.
 
+    Prefers locally cached weights to avoid network timeout retries in sandboxed environments.
+
     Args:
         model_name: HuggingFace model identifier.
 
@@ -21,7 +23,10 @@ def load_cross_encoder(model_name: str = RERANKER_MODEL_NAME) -> CrossEncoder:
         CrossEncoder instance.
     """
     if model_name not in _LOADED_RERANKERS:
-        _LOADED_RERANKERS[model_name] = CrossEncoder(model_name)
+        try:
+            _LOADED_RERANKERS[model_name] = CrossEncoder(model_name, local_files_only=True)
+        except Exception:
+            _LOADED_RERANKERS[model_name] = CrossEncoder(model_name)
     return _LOADED_RERANKERS[model_name]
 
 

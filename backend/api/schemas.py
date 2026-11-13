@@ -139,3 +139,60 @@ class HealthResponse(BaseModel):
     embedder_model: str
     reranker_model: str
     groq_configured: bool
+
+
+class SessionUploadResponse(BaseModel):
+    """Response payload returned when a document is uploaded for an ephemeral session."""
+
+    session_id: str
+    filename: str
+    page_count: int
+    char_count: int
+    chunk_count: int
+    sample_questions: List[str]
+    preview_chunks: List[ChunkDTO]
+    message: str = "Document successfully ingested and indexed into session FAISS & BM25 stores."
+
+
+class SessionDetailResponse(BaseModel):
+    """Detailed metadata and chunks for an active document session."""
+
+    session_id: str
+    filename: str
+    page_count: int
+    char_count: int
+    chunk_count: int
+    sample_questions: List[str]
+    chunks: List[ChunkDTO]
+    created_at: float
+    last_accessed: float
+
+
+class CompareConfigDTO(BaseModel):
+    """Configuration definition for A/B comparison testing."""
+
+    label: str = Field("Config", description="User label e.g. 'Config A'")
+    retriever: RetrieverType = Field("dense", description="Retrieval strategy")
+    top_k: int = Field(5, ge=1, le=20, description="Top-K cutoff")
+    use_reranker: bool = Field(False, description="Opt-in CrossEncoder reranking")
+
+
+class CompareRequest(BaseModel):
+    """Request payload to compare two RAG configurations side-by-side."""
+
+    query: str = Field(..., min_length=1, description="Question to evaluate on both configurations")
+    config_a: CompareConfigDTO
+    config_b: CompareConfigDTO
+
+
+class CompareResponse(BaseModel):
+    """Response payload containing side-by-side results and comparative metrics."""
+
+    query: str
+    result_a: QueryResponse
+    result_b: QueryResponse
+    chunk_overlap_percentage: float
+    shared_chunk_count: int
+    total_unique_chunks: int
+    latency_difference_ms: float
+

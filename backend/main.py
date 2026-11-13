@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.api.deps import init_app_state
-from backend.api.routers import benchmarks, evaluation, health, query
+from backend.api.routers import benchmarks, evaluation, health, query, session
 from backend.config import ALLOWED_ORIGINS
 
 
@@ -43,6 +43,7 @@ app.include_router(health.router)
 app.include_router(query.router)
 app.include_router(evaluation.router)
 app.include_router(benchmarks.router)
+app.include_router(session.router)
 
 
 @app.get("/")

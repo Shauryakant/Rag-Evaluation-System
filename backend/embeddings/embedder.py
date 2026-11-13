@@ -15,6 +15,8 @@ _LOADED_MODELS: Dict[str, SentenceTransformer] = {}
 def load_sentence_transformer(model_name: str = EMBEDDER_MODEL_NAME) -> SentenceTransformer:
     """Lazy-load and cache SentenceTransformer models in memory.
 
+    Prefers locally cached weights to avoid network timeout retries in sandboxed environments.
+
     Args:
         model_name: HuggingFace model identifier.
 
@@ -22,7 +24,10 @@ def load_sentence_transformer(model_name: str = EMBEDDER_MODEL_NAME) -> Sentence
         SentenceTransformer instance.
     """
     if model_name not in _LOADED_MODELS:
-        _LOADED_MODELS[model_name] = SentenceTransformer(model_name)
+        try:
+            _LOADED_MODELS[model_name] = SentenceTransformer(model_name, local_files_only=True)
+        except Exception:
+            _LOADED_MODELS[model_name] = SentenceTransformer(model_name)
     return _LOADED_MODELS[model_name]
 
 
