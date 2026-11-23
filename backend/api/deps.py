@@ -30,16 +30,16 @@ def init_app_state() -> AppState:
     """Initialize corpus documents, chunks, retrieval services, and runner."""
     global _APP_STATE
     if _APP_STATE is None:
-        print("[API] Initializing application state: loading corpus...")
+        print("[API] Initializing application state: loading corpus...", flush=True)
         documents = load_corpus()
-        print(f"[API] Loaded {len(documents)} documents. Splitting into chunks...")
+        print(f"[API] Loaded {len(documents)} documents. Splitting into chunks...", flush=True)
         splitter = RecursiveHeadingSplitter(chunk_size=500, chunk_overlap=50)
         chunks = splitter.split_documents(documents)
-        print(f"[API] Produced {len(chunks)} chunks. Initializing retrieval service...")
+        print(f"[API] Produced {len(chunks)} chunks. Initializing retrieval service...", flush=True)
         service = RetrievalService(chunks=chunks)
-        print("[API] Resolving ground truth testcases...")
+        print("[API] Resolving ground truth testcases...", flush=True)
         test_cases = resolve_ground_truth(chunks=chunks, strict=True)
-        print(f"[API] Resolved {len(test_cases)} benchmark test cases. Setting up runner...")
+        print(f"[API] Resolved {len(test_cases)} benchmark test cases. Setting up runner...", flush=True)
         runner = BenchmarkRunner(service=service, test_cases=test_cases)
         generator = GroqGenerator()
         _APP_STATE = AppState(
@@ -52,7 +52,7 @@ def init_app_state() -> AppState:
         )
         import gc
         gc.collect()
-        print("[API] Application state successfully initialized.")
+        print("[API] Application state successfully initialized.", flush=True)
     return _APP_STATE
 
 

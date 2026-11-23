@@ -90,6 +90,18 @@ class BGEEmbedder:
         safe_model_str = self.model_name.replace("/", "_")
         cache_path = self.cache_dir / f"emb_{safe_model_str}_{payload_hash}.npy"
 
+        # 1. Check canonical pre-baked corpus embeddings
+        from backend.config import DATA_DIR
+        canonical_path = DATA_DIR / "corpus_embeddings.npy"
+        if canonical_path.exists():
+            try:
+                cached_array = np.load(canonical_path)
+                if cached_array.shape[0] == len(texts):
+                    return cached_array.astype(np.float32)
+            except Exception:
+                pass
+
+        # 2. Check hashed disk cache
         if cache_path.exists():
             try:
                 cached_array = np.load(cache_path)

@@ -1,9 +1,18 @@
 """FastAPI backend application for rag-eval-lab."""
 
 import gc
+import os
 import threading
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
+
+# Clamp all linear algebra thread pools to 1 before any native libraries load
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
+os.environ["TORCH_NUM_THREADS"] = "1"
 
 import torch
 # Set PyTorch to 1 CPU thread to prevent memory amplification on 512MB cloud tiers
@@ -20,10 +29,10 @@ from backend.config import ALLOWED_ORIGINS
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Lifespan context initializing corpus and indices asynchronously on server boot."""
-    print("[rag-eval-lab] Starting backend server...")
+    print("[rag-eval-lab] Starting backend server...", flush=True)
     threading.Thread(target=init_app_state, daemon=True).start()
     yield
-    print("[rag-eval-lab] Shutting down backend server.")
+    print("[rag-eval-lab] Shutting down backend server.", flush=True)
 
 
 app = FastAPI(
