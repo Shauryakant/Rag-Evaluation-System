@@ -10,24 +10,17 @@ import {
   useSessionDetail,
   useUploadDocumentSession,
 } from "@/hooks/useRag";
-import { CompareResponse, QueryResponse, RetrieverType, SessionUploadResponse } from "@/types";
+import { RetrieverType, SessionUploadResponse } from "@/types";
 import {
   AlertCircle,
-  ArrowRight,
   Bot,
-  CheckCircle2,
-  ChevronDown,
-  ChevronUp,
-  Clock,
   Columns2,
   Cpu,
   FileSearch,
   FileText,
   FileUp,
-  Flame,
   Layers,
   Play,
-  RotateCcw,
   Send,
   Sliders,
   Sparkles,
@@ -85,7 +78,7 @@ export default function PdfLabPage() {
   const deleteMutation = useDeleteSession();
   const queryMutation = useQuerySession(sessionId || "");
   const compareMutation = useCompareSessionConfigs(sessionId || "");
-  const { data: sessionDetail, isLoading: isLoadingDetail } = useSessionDetail(sessionId);
+  const { data: sessionDetail } = useSessionDetail(sessionId);
 
   // Hydrate session from localStorage on mount
   useEffect(() => {
@@ -213,7 +206,7 @@ export default function PdfLabPage() {
               Upload Document to Start Evaluation Session
             </h2>
             <p className="mt-2 text-xs sm:text-sm text-zinc-400 leading-relaxed">
-              Upload a <strong>PDF, Markdown (.md), or Plaintext (.txt)</strong> document. We'll split it with heading-aware boundaries, encode it with BGE-small, and build isolated FAISS vector & BM25 search indices in memory.
+              Upload a <strong>PDF, Markdown (.md), or Plaintext (.txt)</strong> document. We&apos;ll split it with heading-aware boundaries, encode it with BGE-small, and build isolated FAISS vector & BM25 search indices in memory.
             </p>
           </div>
 
